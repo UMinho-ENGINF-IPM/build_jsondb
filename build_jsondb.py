@@ -17,11 +17,6 @@ def load_json(path):
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
-def nested_set(dic, keys, value):
-    for key in keys[:-1]:
-        dic = dic.setdefault(key, {})
-    dic[keys[-1]] = value
-
 def collect_data(base_dir):
     data = {}
     base_dir = Path(base_dir).resolve()
@@ -34,13 +29,14 @@ def collect_data(base_dir):
             rel_path = path.relative_to(base_dir)
             parts = list(rel_path.parts)
             parts[-1] = Path(parts[-1]).stem  # replace filename with stem (no extension)
+            key = ".".join(rel_path.with_suffix("").parts)  # Flatten into dotted key
 
             try:
                 if ext == ".csv":
                     content = load_csv(path)
                 else:
                     content = load_json(path)
-                nested_set(data, parts, content)
+                data[key] = content
             except:
                 print(f"Skipping file {path}");
 
